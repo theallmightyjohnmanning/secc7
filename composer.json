@@ -1,0 +1,19 @@
+{
+    "autoload": {
+        "psr-4": {
+            "SECC\\": "app/"
+        }
+    },
+
+    "name": "theallmightyjohn/secc7",
+    "description": "A lightweight MVC framework for PHP 7",
+    "version": "2.0",
+    "license": "Apache 2.0",
+    "authors": [
+        {
+            "name": "John Manning",
+            "email": "john.manning89@gmail.com"
+        }
+    ],
+    "require": {}
+}

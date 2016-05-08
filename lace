@@ -1,0 +1,7 @@
+<?php
+
+require_once 'vendor/autoload.php';
+
+use SECC\Commands\LACE;
+
+LACE::initialize($argc, $argv);
