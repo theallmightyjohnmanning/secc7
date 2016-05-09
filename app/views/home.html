@@ -1,16 +1,6 @@
-@use(SECC\App)
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>SECC7 MVC</title>
-</head>
-<body>
-	@if(1+2 == 3)
-		<h1>{{'Yay'}}</h1>
-	@endif
-	@yield('content')
-	@yield('content2')
-	@yield('content3')
-</body>
-</html>
+@extends('base')
+
+@section('content 1')
+<h1>This is content for section 1</h1>
+@section('content 2')
+<h2>This is content for section 2</h2>

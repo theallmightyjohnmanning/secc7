@@ -156,17 +156,24 @@ class Template
 				$temp = $template;
 				$template = file_get_contents(self::$templateDirectory.$file.self::$extension);
 
-				preg_match_all('/@yield\((.+)\)/', $template, $yields);
-				$sections = preg_split('/@section/', $temp);
-				for($i = 1; $i < count($sections); $i++)
-				{
-					$sections[$i] = preg_replace('/\((.+)\)/', '', $sections[$i]);
-					$sections[$i] = str_replace('@stop', '', $sections[$i]);
-				}
+				preg_match_all('/@section\((.+)\)/', $template, $yields);
+				preg_match_all('/@section\((.+)\)/', $temp, $titles);
 
-				for($i = 0; $i < count($yields[0]); $i++)
+				$yields = $yields[0];
+				$titles = $titles[0];
+
+				$sections = preg_split('/@section/', $temp);
+				$sections = preg_replace('/\((.+)\)/', '', $sections);		
+
+				foreach($yields as $x => $yield)
 				{
-					$template = str_replace($yields[0][$i], $sections[$i+1], $template);
+					foreach($titles as $y => $title)
+					{
+						if($yield === $title)
+						{
+							$template = str_replace($yield, $sections[$y+1], $template);
+						}
+					}
 				}
 			}
 		}

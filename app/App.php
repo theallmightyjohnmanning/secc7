@@ -21,7 +21,7 @@ class App
 		session_start();
 		
 		self::service('Template')->initialize();
-		self::service('Template')->render('test');
+		self::service('Template')->render('home');
 	}
 
 	/**
