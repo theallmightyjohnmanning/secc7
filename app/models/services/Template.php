@@ -48,10 +48,12 @@ class Template
 	{
 		if(!empty($template))
 		{
+			$cachedFileName = md5(File::lastDotFormatedEntry($template).self::$extension);
+			$template 		= File::dotsToSlashes($template);
 			if(self::compile($template))
 			{
 				$template = File::lastDotFormatedEntry($template);
-				require_once self::$cachedDirectory.$template.self::$extension;
+				require_once self::$cachedDirectory.$cachedFileName.self::$extension;
 			}
 			else
 				throw new \Exception('A compilation error occured!', 1);;
@@ -90,13 +92,14 @@ class Template
 	 */
 	public static function compile($template = '')
 	{
-		$fileName = File::lastDotFormatedEntry($template); // Get the actual file name from the params
-		$template = File::dotsToSlashes($template); // Convert dots in params to slashes
+		$templateFileName 	= File::lastDotFormatedEntry($template); // Get the actual file name from the params
+		$template 			= File::dotsToSlashes($template); // Convert dots in params to slashes
+		$cachedFileName 	= md5($template.self::$extension);
 		if(file_exists(self::$templateDirectory.$template.self::$extension))
 			$templateAge = File::age(self::$templateDirectory.$template.self::$extension);
 
-		if(file_exists(self::$cachedDirectory.$template.self::$extension))
-			$cachedAge = File::age(self::$cachedDirectory.$template.self::$extension);
+		if(file_exists(self::$cachedDirectory.$cachedFileName.self::$extension))
+			$cachedAge = File::age(self::$cachedDirectory.$cachedFileName.self::$extension);
 
 		if(isset($templateAge) && isset($cachedAge))
 		{
@@ -104,14 +107,14 @@ class Template
 			// same age as it's cached version
 			if($templateAge === $cachedAge)
 			{
-				$template = file_get_contents(self::$cachedDirectory.$template.self::$extension);
+				$template = file_get_contents(self::$cachedDirectory.$cachedFileName.self::$extension);
 				return true;
 			}
 			else // Sync the cached template file to it's updated version
 			{
 				$template = file_get_contents(self::$templateDirectory.$template.self::$extension);
 				$template = self::scanDocument($template);
-				file_put_contents(self::$cachedDirectory.$fileName.self::$extension, $template);
+				file_put_contents(self::$cachedDirectory.$cachedFileName.self::$extension, $template);
 				return true;
 			}
 		}
@@ -119,7 +122,7 @@ class Template
 		{
 			$template = file_get_contents(self::$templateDirectory.$template.self::$extension);
 			$template = self::scanDocument($template);
-			file_put_contents(self::$cachedDirectory.$fileName.self::$extension, $template);
+			file_put_contents(self::$cachedDirectory.$cachedFileName.self::$extension, $template);
 			return true;
 		}
 		
@@ -147,8 +150,8 @@ class Template
 		preg_match('/@extends\((.+)\)/', $template, $out);
 		if(isset($out[0]))
 		{
-			$file = File::dotsToSlashes($out[1]);
 			$file = File::lastDotFormatedEntry($out[1]);
+			$file = File::dotsToSlashes($out[1]);
 			$file = preg_replace('/\'/', '', $file);
 
 			if(file_exists(self::$templateDirectory.$file.self::$extension))
@@ -178,7 +181,6 @@ class Template
 			}
 		}
 
-
 		$template = preg_replace('/(?:(?:\r\n|\r|\n)\s*){2}/s', "\n\n", $template);
 
 		return $template;
@@ -190,26 +192,27 @@ class Template
 
 		for($i = 0; $i < count($out[0]); $i++)
 		{
-			$file = File::dotsToSlashes($out[1][$i]);
-			$file = File::lastDotFormatedEntry($file);
-			$file = preg_replace('/\'/', '', $file);
+			$fileName 		= File::lastDotFormatedEntry($file);
+			$cachedFileName = md5($fileName.self::$extension);
+			$file 			= File::dotsToSlashes($out[1][$i]);
+			$file 			= preg_replace('/\'/', '', $file);
 
-			if(file_exists(self::$templateDirectory.$file.self::$extension))
-				$templateAge = File::age(self::$templateDirectory.$file.self::$extension);
+			if(file_exists(self::$templateDirectory.$fileName.self::$extension))
+				$templateAge = File::age(self::$templateDirectory.$fileName.self::$extension);
 
-			if(file_exists(self::$cachedDirectory.$file.self::$extension))
-				$cachedAge = File::age(self::$cachedDirectory.$file.self::$extension);
+			if(file_exists(self::$cachedDirectory.$cachedFileName.self::$extension))
+				$cachedAge = File::age(self::$cachedDirectory.$cachedFileName.self::$extension);
 
 			if($templateAge === $cachedAge)
 			{
-				$template = str_replace($out[0][$i], '<?php include \''.self::$cachedDirectory.$file.self::$extension.'\'; ?>', $template);
+				$template = str_replace($out[0][$i], '<?php include \''.self::$cachedDirectory.$cachedFileName.self::$extension.'\'; ?>', $template);
 			}
 			else if($templateAge)
 			{
 				$partial = file_get_contents(self::$templateDirectory.$file.self::$extension);
 				$partial = self::scanDocument($partial);
-				file_put_contents(self::$cachedDirectory.$file.self::$extension, $partial);
-				$template = str_replace($out[0][$i], '<?php include \''.self::$cachedDirectory.$file.self::$extension.'\'; ?>', $template);
+				file_put_contents(self::$cachedDirectory.$cachedFileName.self::$extension, $partial);
+				$template = str_replace($out[0][$i], '<?php include \''.self::$cachedDirectory.$cachedFileName.self::$extension.'\'; ?>', $template);
 			}
 			else
 			{
