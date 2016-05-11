@@ -48,7 +48,7 @@ class Template
 	{
 		if(!empty($template))
 		{
-			$cachedFileName = md5(File::lastDotFormatedEntry($template).self::$extension);
+			$cachedFileName = md5(File::dotsToSlashes($template).self::$extension);
 			$template 		= File::dotsToSlashes($template);
 			if(self::compile($template))
 			{
@@ -94,7 +94,7 @@ class Template
 	{
 		$templateFileName 	= File::lastDotFormatedEntry($template); // Get the actual file name from the params
 		$template 			= File::dotsToSlashes($template); // Convert dots in params to slashes
-		$cachedFileName 	= md5($template.self::$extension);
+		$cachedFileName 	= md5($templateFileName.self::$extension);
 		if(file_exists(self::$templateDirectory.$template.self::$extension))
 			$templateAge = File::age(self::$templateDirectory.$template.self::$extension);
 
@@ -193,8 +193,8 @@ class Template
 		for($i = 0; $i < count($out[0]); $i++)
 		{
 			$fileName 		= File::lastDotFormatedEntry($file);
-			$cachedFileName = md5($fileName.self::$extension);
 			$file 			= File::dotsToSlashes($out[1][$i]);
+			$cachedFileName = md5($file.self::$extension);
 			$file 			= preg_replace('/\'/', '', $file);
 
 			if(file_exists(self::$templateDirectory.$fileName.self::$extension))
